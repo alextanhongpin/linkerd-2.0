@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-client-deployment
+  labels:
+    app: go-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-client
+  template:
+    metadata:
+      labels:
+        app: go-client
+    spec:
+      containers:
+        - name: go-client
+          image: alextanhongpin/go-client:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 8080
+          env:
+            - name: SERVICE_URL
+              # This is the name of the server Service metadata name.
+              value: http://go-server-service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-client-service
+spec:
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  selector:
+    app: go-client

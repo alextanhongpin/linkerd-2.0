@@ -1,9 +1,11 @@
-build-server:
-	cd go-server && \
-	docker build -t alextanhongpin/go-server .
+# Run build-server or build-client.
+build-%:
+	cd go-$* && \
+	docker build -t alextanhongpin/go-$* .
 
-inject-linkerd:
-	cat go-server/deployment.yaml | linkerd inject - | kubectl apply -f -
+
+inject-%:
+	cat go-$*/deployment.yaml | linkerd inject - | kubectl apply -f -
 
 dashboard:
 	@linkerd dashboard &
