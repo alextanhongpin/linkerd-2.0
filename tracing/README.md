@@ -40,5 +40,18 @@ The output can be seen below:
 $ k -n linkerd rollout status deploy/linkerd-jaeger
 ```
 
+## Jaeger Tracing
+
+The tracing is enabled in `go-server`. To open the Jaeger dashboard:
+
+```bash
+$ kubectl -n linkerd port-forward svc/linkerd-jaeger 16686
+```
+
+If you make a call to the `go-server` NodePort, you should see this:
+
+![Jaeger Tracing](../assets/tracing-jaeger.png)
+
+
 # References
 - https://linkerd.io/2/tasks/distributed-tracing/
