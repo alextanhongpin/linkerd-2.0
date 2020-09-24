@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"time"
 
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/label"
@@ -47,6 +49,16 @@ func main() {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
+	timeout := r.URL.Query().Get("timeout")
+	if timeout == "true" {
+		time.Sleep(3 * time.Second)
+	}
+	retry := r.URL.Query().Get("retry")
+	if retry == "true" {
+		if rand.Float32() < 0.5 {
+			log.Fatal("bad request")
+		}
+	}
 	tracer := global.Tracer("component/indexHandler")
 	ctx, span := tracer.Start(r.Context(), "indexHandler")
 	defer span.End()

@@ -1,0 +1,54 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-timeout-deployment
+  labels:
+    app: go-timeout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-timeout
+  template:
+    metadata:
+      labels:
+        app: go-timeout
+    spec:
+      containers:
+        - name: go-timeout
+          image: alextanhongpin/go-timeout:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 8080
+          env:
+            - name: SERVICE_URL
+              # This is the name of the server Service metadata name.
+              value: http://go-server-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-timeout-service
+spec:
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  selector:
+    app: go-timeout
+---
+#https://linkerd.io/2/reference/service-profiles/
+apiVersion: linkerd.io/v1alpha2
+kind: ServiceProfile
+metadata:
+  name: go-timeout-service.default.svc.cluster.local
+  namespace: default
+spec:
+  routes:
+    - name: GET /
+      condition:
+        method: GET
+        pathRegex: /
+      timeout: 25ms ### ADD THIS LINE ###

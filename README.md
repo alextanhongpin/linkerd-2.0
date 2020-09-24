@@ -31,6 +31,9 @@ Install Linkerd onto the cluster:
 
 ```bash
 $ linkerd install | kubectl apply -f -
+
+# Fresh install.
+$ linkerd install --ignore-cluster | kubectl delete -f -
 ```
 
 Validate the installation:

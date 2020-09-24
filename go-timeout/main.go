@@ -17,7 +17,8 @@ func main() {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	qs := r.URL.Query().Encode()
-	resp, err := http.Get(os.Getenv("SERVICE_URL") + "/?" + qs)
+	svcURL := os.Getenv("SERVICE_URL") + "/?" + qs
+	resp, err := http.Get(svcURL)
 	if err != nil {
 		log.Fatal(err)
 	}

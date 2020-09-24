@@ -2,38 +2,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: go-server-deployment
+  name: go-retry-deployment
   labels:
-    app: go-server
+    app: go-retry
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: go-server
+      app: go-retry
   template:
     metadata:
       labels:
-        app: go-server
-      # This is required to make tracing work.
-      annotations:
-        linkerd.io/inject: enabled
-        config.linkerd.io/trace-jaeger: linkerd-jaeger.linkerd:14268
-        config.alpha.linkerd.io/trace-jaeger-service-account: linkerd-jaeger
+        app: go-retry
     spec:
       containers:
-        - name: go-server
-          image: alextanhongpin/go-server:latest
+        - name: go-retry
+          image: alextanhongpin/go-retry:latest
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 8080
           env:
-            - name: JAEGER_AGENT_HOST
-              value: http://linkerd-jaeger.linkerd:14268/api/traces
+            - name: SERVICE_URL
+              # This is the name of the server Service metadata name.
+              value: http://go-server-service
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: go-server-service
+  name: go-retry-service
 spec:
   type: NodePort
   ports:
@@ -41,21 +37,19 @@ spec:
     port: 80
     targetPort: 8080
   selector:
-    app: go-server
+    app: go-retry
 ---
 #https://linkerd.io/2/reference/service-profiles/
 apiVersion: linkerd.io/v1alpha2
 kind: ServiceProfile
 metadata:
-  name: go-server-service.default.svc.cluster.local
-  namespace: default
+  name: go-retry-service.default.svc.cluster.local
 spec:
   routes:
     - name: GET /
       condition:
         method: GET
         pathRegex: /
-      timeout: 25ms ### ADD THIS LINE ###
       isRetryable: true ### ADD THIS LINE ###
   retryBudget:
     retryRatio: 0.2
